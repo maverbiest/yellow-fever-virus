@@ -1,0 +1,93 @@
+{
+  "title": "< your virus > - Nextclade dataset tree",
+  "build_url": "https://github.com/hodcroftlab/...",
+  "maintainers": [
+    { "name": "Author", "url": "< URL >" },
+    { "name": "Emma B. Hodcroft", "url": "http://emmahodcroft.com/" }
+  ],
+  "extensions": {
+    "nextclade": {
+      "ref_nodes": {
+        "default": "__root__",
+        "builtins": {
+          "__root__": {
+            "displayName": "Reference [< Accession ID >]",
+            "description": "< Reference > strain"
+          }
+        },
+        "search": [
+          {
+            "name": "InferredAncestor",
+            "displayName": "Static Inferred Ancestor",
+            "description": "Precomputed ancestral sequence (static)",
+            "criteria": [
+              {
+                "node": [
+                  {
+                    "name": ["ancestral_sequence"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Inferred root",
+            "displayName": "Tree root",
+            "description": "Inferred ancestral root (regenerated on each run)",
+            "criteria": [
+              {
+                "node": [
+                  {
+                    "name": ["NODE_0000000"]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "colorings": [
+    {
+      "title": "Clade",
+      "type": "categorical",
+      "key": "clade_membership"
+    },
+    {
+      "title": "Collection Date",
+      "type": "categorical",
+      "key": "date"
+    },
+    {
+      "title": "Country",
+      "type": "categorical",
+      "key": "country"
+    },
+    {
+      "title": "Global Region",
+      "type": "categorical",
+      "key": "region"
+    }
+  ],
+  "geo_resolutions": [
+    "country", "region"
+  ],
+  "filters": [
+    "country",
+    "region",
+    "clade_membership"
+  ],
+  "display_defaults": {
+    "color_by": "clade_membership",
+    "geo_resolution": "country",
+    "tip_label": "strain",
+    "branch_label": "clade",
+    "map_triplicate": true
+  },
+  "panels": [
+    "tree",
+    "map",
+    "entropy"
+  ]
+}
