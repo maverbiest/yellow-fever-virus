@@ -10,9 +10,9 @@
     "changelog": "CHANGELOG.md"
   },
   "attributes": {
-    "name": "< your virus >",
-    "reference name": "< reference name of your virus >",
-    "reference accession": "< ref accession number of your virus >"
+    "name": "Yellow Fever Virus",
+    "reference name": "Yellow fever virus, complete genome",
+    "reference accession": "NC_002031.1"
   },
   "alignmentParams": {
         "penaltyGapOpen": 13,
@@ -25,7 +25,7 @@
         "minLength": 100,
         "minSeedCover": 0.30
     },
-  "defaultCds": "VP1",
+  "defaultCds": "M",
   "compatibility": {
         "cli": "3.0.0-alpha.0",
         "web": "3.0.0-alpha.0"
@@ -57,6 +57,5 @@
       "scoreWeight": 40
     }
     },
-  "cdsOrderPreference":["VP4", "VP2", "VP3", "VP1", "2A", "2B", "2C", "3A", "3B", "3C", "3D"]
-
+  "cdsOrderPreference": ["C", "PreM", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"]
 }

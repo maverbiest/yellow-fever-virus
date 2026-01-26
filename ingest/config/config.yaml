@@ -6,7 +6,7 @@ conda_environment: "workflow/envs/nextstrain.yaml"
 entrez_search_term: "< your virus>"
 
 # Required to fetch from NCBI Datasets
-ncbi_taxon_id: < taxid > # taxid for <your_virus>
+ncbi_taxon_id: 11089 # taxid for <your_virus>
 
 ncbi_datasets_fields:
   - accession

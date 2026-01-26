@@ -28,7 +28,7 @@ def get_gff(accession):
 def annotate_sequence(seq, cds):
     from Bio.SeqFeature import SeqFeature
     from Bio.SeqFeature import FeatureLocation, SimpleLocation, CompoundLocation
-    strands = {'+':1, '-':-1}
+    strands = {'+':1, '-':-1}generate_from_genbank
     new_features = [feat for feat in seq.features if feat.type=='source']
     for cdsid, segments in cds.items():
         if len(segments)==0:

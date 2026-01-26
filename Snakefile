@@ -5,18 +5,18 @@ include: "scripts/workflow_messages.snkm"
 # -----------------------------------------------------------------------------
 # Define general parameters, filtering thresholds, and workflow options.
 
-REFERENCE_ACCESSION =   "<accession>"   # define the reference sequence
-TAXON_ID =              <...>           # define the taxon id of your virus 
-GENES =                 ["VP4", "VP2", "VP3", "VP1", "2A", "2B", "2C", "3A", "3B", "3C", "3D"] # specify the genes that will be included. The names must match the annotation & reference gene/product names
+REFERENCE_ACCESSION =   "NC_002031.1"   # define the reference sequence
+TAXON_ID =              11089           # define the taxon id of your virus 
+GENES =                 ["C", "PreM", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"] # specify the genes that will be included. The names must match the annotation & reference gene/product names
 ALLOWED_DIVERGENCE =    "3000"          # TODO: lower this threshold to exclude outliers
 MIN_DATE =              "1960-01-01"    # all sequences collected beforehand will be excluded
-MIN_LENGTH =            "6000"          # is 6000 bp for whole genome build on Nextstrain
+MIN_LENGTH =            "9000"          # is 6000 bp for whole genome build on Nextstrain
 MAX_SEQS =              "10000"         # TODO: set lower to subsample the tree
-ROOTING =               "ancestral_sequence"  # mid_point, outgroup, reference, ancestral sequence
+ROOTING =               "best"     # mid_point, outgroup, reference, ancestral sequence
 ID_FIELD=               "accession"     # either accession or strain, used for meta-id-column in augur
 
 FETCH_SEQUENCES = True              # whether to fetch sequences from NCBI Virus via ingest workflow
-STATIC_ANCESTRAL_INFERRENCE = True  # whether to use the static inferred ancestral sequence
+STATIC_ANCESTRAL_INFERRENCE = False  # whether to use the static inferred ancestral sequence
 INFERRENCE_RERUN = False            # whether to rerun the inference of the ancestral sequence worfkflow (inferred-root)
 
 # -----------------------------------------------------------------------------
@@ -43,8 +43,7 @@ ACCESSION_STRAIN =      "resources/accession_strain.tsv"    # Optional mapping o
 INCLUDE_EXAMPLES =      "resources/include_examples.txt"    # List of sequences to include in example sequences (rule subsample_example_sequences)
 COLORS =                "resources/colors.tsv"              # Color assignments for metadata fields.
 COLORS_SCHEMES =        "resources/color_schemes.tsv"       # Preset color schemes for Auspice.
-GENBANK_PATH =          "resources/reference.gbk"           # Reference genome in GenBank format (for gene mapping)
-INFERRED_ANCESTOR =     "resources/inferred-root.fasta"     # Inferred ancestral sequence (used as alternative reference)
+GENBANK_PATH =          "dataset/reference.gbk"             # Reference genome in GenBank format (for gene mapping)
 # -----------------------------------------------------------------------------
 
 configfile: PATHOGEN_JSON
@@ -228,7 +227,6 @@ rule align:
         tsv = "results/nextclade.tsv",
     params:
         translation_template = lambda w: "results/translations/cds_{cds}.translation.fasta",
-        penalty_gap_extend = config["alignmentParams"]["penalityGapExtend"],
         penalty_gap_open = config["alignmentParams"]["penaltyGapOpen"],
         penalty_gap_open_in_frame = config["alignmentParams"]["penaltyGapOpenInFrame"],
         penalty_gap_open_out_of_frame = config["alignmentParams"]["penaltyGapOpenOutOfFrame"],
@@ -237,7 +235,6 @@ rule align:
         min_match_length = config["alignmentParams"]["minMatchLength"],
         allowed_mismatches = config["alignmentParams"]["allowedMismatches"],
         min_length = config["alignmentParams"]["minLength"],
-        gap_alignment_side = config["alignmentParams"]["gapAlignmentSide"],  
         min_seed_cover = config["alignmentParams"]["minSeedCover"],
     shell:
         """
@@ -248,10 +245,8 @@ rule align:
         --input-annotation {input.annotation} \
         --alignment-preset high-diversity \
         --penalty-gap-open {params.penalty_gap_open} \
-        --penalty-gap-extend {params.penalty_gap_extend} \
         --penalty-gap-open-in-frame {params.penalty_gap_open_in_frame} \
         --penalty-gap-open-out-of-frame {params.penalty_gap_open_out_of_frame} \
-        --gap-alignment-side {params.gap_alignment_side} \
         --kmer-length {params.kmer_length} \
         --kmer-distance {params.kmer_distance} \
         --min-match-length {params.min_match_length} \
