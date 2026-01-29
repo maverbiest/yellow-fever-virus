@@ -1,0 +1,4 @@
+NC_002031.1 #reference
+FV537409.1 #modified sequence
+FV537410.1 #modified sequence
+JB021957.1 #sequence from patent

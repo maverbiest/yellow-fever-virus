@@ -1,0 +1,56 @@
+{
+  "title": "Yellow Fever Virus",
+  "maintainers": [
+    {
+      "name": "Max Verbiest"
+    }
+  ],
+  "build_url": "",
+  "colorings": [
+    {
+      "key": "gt",
+      "title": "Genotype",
+      "type": "categorical"
+    },
+    {
+      "key": "Isolate Collection date",
+      "title": "Date",
+      "type": "continuous"
+    },
+    {
+      "key": "Submitter Names",
+      "title": "Author",
+      "type": "categorical"
+    },
+    {
+      "key": "Region",
+      "title": "Region",
+      "type": "categorical"
+    },
+    {
+      "key": "Country",
+      "title": "Country",
+      "type": "categorical"
+    },
+    {
+      "key": "clade_membership",
+      "title": "Clade",
+      "type": "categorical"
+    }
+  ],
+  "geo_resolutions": [
+    "Country",
+    "Region"
+  ],
+  "panels": [
+    "tree",
+    "map",
+    "entropy"
+  ],
+  "metadata_columns": [
+    "Accession"
+  ],
+  "display_defaults": {
+    "map_triplicate": true
+  }
+}

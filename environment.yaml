@@ -1,0 +1,13 @@
+name: yellow-fever-virus
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python
+  - biopython
+  - nextclade
+  - snakemake
+  - ncbi-datasets-cli >=16.33.0
+  - augur
+  - click
+  - pandas

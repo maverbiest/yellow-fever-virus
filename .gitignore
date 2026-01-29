@@ -1,3 +1,6 @@
+#misc
+.DS_Store
+
 ## add your work email
 .env
 
