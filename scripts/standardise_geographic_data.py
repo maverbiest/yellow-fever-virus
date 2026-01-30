@@ -2,8 +2,9 @@
 import logging
 
 import click
-import numpy as np
 import pandas as pd
+
+TARGET_REGIONS = ["africa", "south america", "south-america"]
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -28,6 +29,7 @@ logging.basicConfig(
 )
 @click.option("--metadata", required=True, type=click.Path(exists=True))
 @click.option("--location-with-region-col", required=True, type=str)
+@click.option("--filter-regions", default=False, type=bool)
 @click.option("--output", required=True, type=str)
 @click.option(
     "--log-level",
@@ -37,6 +39,7 @@ logging.basicConfig(
 def main(
     metadata: str,
     location_with_region_col: str,
+    filter_regions: bool,
     output: str,
     log_level: str,
 ):
@@ -45,14 +48,23 @@ def main(
     df = pd.read_csv(metadata, sep="\t", encoding="utf-8").rename(
         columns={"Geographic Region": "Region"}
     )
-    df["Country"] = pd.Series(index=range(0, df.shape[0]), dtype=object)
 
+    df["Country"] = pd.Series(index=range(0, df.shape[0]), dtype=object)
     expression = {
         "Country": lambda x: [i.split(":")[0] for i in x[location_with_region_col]]
     }
     df[~df[location_with_region_col].isna()] = df[
         ~df[location_with_region_col].isna()
     ].assign(**expression)
+
+    if filter_regions:
+        logger.info(f"Removing sequences that are not from {TARGET_REGIONS}")
+        df = df[
+            [
+                i.lower() in TARGET_REGIONS if isinstance(i, str) else True
+                for i in df["Region"]
+            ]
+        ]
 
     df.to_csv(output, sep="\t", index=False)
 

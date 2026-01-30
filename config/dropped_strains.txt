@@ -2,3 +2,6 @@ NC_002031.1 #reference
 FV537409.1 #modified sequence
 FV537410.1 #modified sequence
 JB021957.1 #sequence from patent
+JB319328.1 #sequence from patent
+MH444796.1 #vaccine strain
+PI205089.1 #attenuated virusnnotat

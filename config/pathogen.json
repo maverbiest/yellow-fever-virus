@@ -57,5 +57,5 @@
       "scoreWeight": 40
     }
     },
-  "cdsOrderPreference": ["C", "PreM", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"]
+  "cdsOrderPreference": ["C", "PrM", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"]
 }

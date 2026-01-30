@@ -1,16 +1,17 @@
 REFERENCE = "config/reference.fasta"
 GENOME_ANNOTATION = "config/genome_annotation.gff3"
+PATHOGEN_JSON = "config/pathogen.json"
 TAXON_ID = 11089
 DROPPED_STRAINS = "config/dropped_strains.txt"
 
 COLORS = ("config/colors.tsv",)
 LAT_LONGS = ("config/lat_longs.tsv",)
-CLADES = "config/clades_0b.tsv"
+CLADES = "config/clades_new.tsv"
 AUSPICE_CONFIG = "config/auspice_config.json"
 
 rule all:
     input:
-        "auspice/yellow-fever.json"
+        "auspice/yellow-fever.json",
 
 rule fetch_ncbi_dataset_package:
     output:
@@ -50,13 +51,13 @@ rule standardise_geo_data:
     input:
         metadata=rules.format_ncbi_dataset_report.output.ncbi_dataset_tsv,
     output:
-        metadata_country="./data/metadata_with_country.tsv",
+        metadata_country="data/metadata_with_country.tsv",
     params:
         location_col="Geographic Location",
         country_col="Country",
     shell:
         """
-        python3 ./scripts/standardise_geographic_data.py \
+        python3 scripts/standardise_geographic_data.py \
             --metadata {input.metadata} \
             --location-with-region-col '{params.location_col}' \
             --output {output.metadata_country}
@@ -305,3 +306,36 @@ rule export:
             --output {output.auspice_json} \
             --metadata-id-columns {params.id_column}
         """
+
+
+rule assemble_dataset:
+    input:
+        tree = rules.export.output.auspice_json,
+        reference = REFERENCE,
+        annotation = GENOME_ANNOTATION,
+        sequences = "tmp.fa",
+        pathogen = PATHOGEN_JSON,
+        readme = "README.md",
+        changelog = "CHANGELOG.md",
+    params:
+        pathogen = "out-dataset/pathogen.json",
+    output:
+        tree = "out-dataset/tree.json",
+        reference = "out-dataset/reference.fasta",
+        annotation = "out-dataset/genome_annotation.gff3",
+        sequences = "out-dataset/sequences.fasta",
+        readme = "out-dataset/README.md",
+        changelog = "out-dataset/CHANGELOG.md",
+        dataset_zip = "dataset.zip",
+    shell:
+        """
+        cp {input.tree} {output.tree}
+        cp {input.reference} {output.reference}
+        cp {input.annotation} {output.annotation}
+        cp {input.sequences} {output.sequences}
+        cp {input.pathogen} {params.pathogen}
+        cp {input.readme} {output.readme}
+        cp {input.changelog} {output.changelog}
+        zip -rj dataset.zip  out-dataset/*
+        """
+
