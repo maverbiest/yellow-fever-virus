@@ -12,6 +12,7 @@ AUSPICE_CONFIG = "config/auspice_config.json"
 rule all:
     input:
         "auspice/yellow-fever.json",
+        "dataset.zip",
 
 rule fetch_ncbi_dataset_package:
     output:
@@ -307,13 +308,39 @@ rule export:
             --metadata-id-columns {params.id_column}
         """
 
+rule generate_example_data:
+    message:
+        "Generating example dataset"
+    input:
+        sequences=rules.extract_ncbi_dataset_sequences.output.ncbi_dataset_sequences,
+        clades=rules.clades.output.node_data,
+        dropped_strains=DROPPED_STRAINS,
+    output:
+        output_fasta="data/example_sequences.fasta",
+    params:
+        n_sequences=20,
+        balance=True,
+        random_seed=42,
+    shell:
+        """
+        python scripts/example_data.py \
+            --input-fasta {input.sequences} \
+            --n {params.n_sequences} \
+            --clade-membership {input.clades} \
+            --dropped_strains {input.dropped_strains} \
+            --balance {params.balance} \
+            --seed {params.random_seed} \
+            --output {output.output_fasta} \
+        """
 
 rule assemble_dataset:
+    message:
+        "Assembling NextClade dataset"
     input:
         tree = rules.export.output.auspice_json,
         reference = REFERENCE,
         annotation = GENOME_ANNOTATION,
-        sequences = "tmp.fa",
+        sequences = rules.generate_example_data.output.output_fasta,
         pathogen = PATHOGEN_JSON,
         readme = "README.md",
         changelog = "CHANGELOG.md",

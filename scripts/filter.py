@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from Bio import SeqIO
 import click
@@ -12,6 +13,14 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)8s (%(filename)20s:%(lineno)4d) - %(message)s ",
     datefmt="%H:%M:%S",
 )
+
+
+def read_dropped_strains(dropped_strains: str) -> List[str]:
+    with open(dropped_strains, "r") as file:
+        dropped_strain_list = file.read().splitlines()
+    dropped_strain_list = [name.split()[0] for name in dropped_strain_list]
+
+    return dropped_strain_list
 
 
 @click.command(help="Parse fasta header, only keep if fits regex filter_fasta_headers")
@@ -48,10 +57,7 @@ def main(
         f"Found {len(too_low_coverage)} strains with coverage under {min_coverage}"
     )
 
-    with open(dropped_strains, "r") as file:
-        dropped_strain_list = file.read().splitlines()
-    dropped_strain_list = [name.split()[0] for name in dropped_strain_list]
-
+    dropped_strain_list = read_dropped_strains(dropped_strains)
     logger.info(
         f"Additionally dropping {len(dropped_strain_list)} strains: {dropped_strain_list}"
     )

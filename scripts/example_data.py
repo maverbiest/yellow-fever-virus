@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 import logging
 import json
-from typing import Tuple
+from typing import Set, Tuple
 
 from Bio import SeqIO
 import click
-from numpy import require
 import pandas as pd
+
+from filter import read_dropped_strains
+
+REFERENCE_ACCESSION = "NC_002031.1"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -42,9 +45,11 @@ def load_clades(clade_json: str) -> pd.DataFrame:
          """
 )
 @click.option("--input-fasta", required=True, type=click.Path(exists=True))
-@click.option("--clade-membership", required=True, type=click.Path(exists=True))
 @click.option("--n", required=True, type=int)
+@click.option("--clade-membership", required=True, type=click.Path(exists=True))
+@click.option("--dropped_strains", required=False, type=click.Path(exists=True))
 @click.option("--balance", default=True, type=bool)
+@click.option("--seed", default=42, type=int)
 @click.option("--output", required=True, type=str)
 @click.option(
     "--log-level",
@@ -53,9 +58,11 @@ def load_clades(clade_json: str) -> pd.DataFrame:
 )
 def main(
     input_fasta: str,
-    clade_membership: str,
     n: int,
+    clade_membership: str,
+    dropped_strains: str,
     balance: bool,
+    seed: int,
     output: str,
     log_level: str,
 ):
@@ -69,9 +76,15 @@ def main(
 
     # DataFrame.sample() automatically normalizes weights, so don't need to sum to 1.0
     weights = 1 / df_clades.groupby("Clade")["Clade"].transform("size")
-    sample = df_clades.sample(n, weights=weights if balance else None)[
-        "Accession"
-    ].to_list()
+    sample = df_clades.sample(
+        n, weights=weights if balance else None, random_state=seed
+    )["Accession"].to_list()
+    sample = set(sample)
+
+    if dropped_strains:
+        dropped_strain_list = set(read_dropped_strains(dropped_strains))
+        dropped_strain_list.remove(REFERENCE_ACCESSION)
+        sample = sample.union(set(dropped_strain_list))
 
     with open(output, "w") as o:
         with open(input_fasta):
