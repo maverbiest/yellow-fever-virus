@@ -39,9 +39,11 @@ def load_clades(clade_json: str) -> pd.DataFrame:
 
 @click.command(
     help="""
-            Take a random subsample of `--n` sequences from `--input-fasta` and write them 
-            to `--output`. If `--clade-membership` is provided, subsampling will ensure balanced
-            sampling across clades (or error if this is not possible with provided `--n`)
+            Generate an example dataset by taking a random subsample of `--n` sequences from `--input-fasta` and
+            combining them with the sequences in `--in-dropped-strains`, if provided (can be nice to have some 
+            examples of bad sequences). The example sequences are written to `--output`. If `--clade-membership` 
+            is provided, subsampling will ensure balanced sampling across clades. The script errors if `--n` is larger
+            than the number of sequences in the dataset.
          """
 )
 @click.option("--input-fasta", required=True, type=click.Path(exists=True))
