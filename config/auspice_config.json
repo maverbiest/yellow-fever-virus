@@ -13,11 +13,6 @@
       "type": "categorical"
     },
     {
-      "key": "Isolate Collection date",
-      "title": "Date",
-      "type": "continuous"
-    },
-    {
       "key": "Submitter Names",
       "title": "Author",
       "type": "categorical"

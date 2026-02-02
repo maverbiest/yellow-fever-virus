@@ -48,21 +48,21 @@ rule format_ncbi_dataset_report:
             > {output.ncbi_dataset_tsv}
         """
 
-rule standardise_geo_data:
-    input:
-        metadata=rules.format_ncbi_dataset_report.output.ncbi_dataset_tsv,
-    output:
-        metadata_country="data/metadata_with_country.tsv",
-    params:
-        location_col="Geographic Location",
-        country_col="Country",
-    shell:
-        """
-        python3 scripts/standardise_geographic_data.py \
-            --metadata {input.metadata} \
-            --location-with-region-col '{params.location_col}' \
-            --output {output.metadata_country}
-        """
+# rule standardise_geo_data:
+#     input:
+#         metadata=rules.format_ncbi_dataset_report.output.ncbi_dataset_tsv,
+#     output:
+#         metadata_country="data/metadata_with_country.tsv",
+#     params:
+#         location_col="Geographic Location",
+#         country_col="Country",
+#     shell:
+#         """
+#         python3 scripts/standardise_geographic_data.py \
+#             --metadata {input.metadata} \
+#             --location-with-region-col '{params.location_col}' \
+#             --output {output.metadata_country}
+#         """
 
 
 rule prealign:
@@ -91,7 +91,7 @@ rule filter:
         """
     input:
         sequences="data/sequences.fasta",
-        metadata=rules.standardise_geo_data.output.metadata_country,
+        metadata=rules.format_ncbi_dataset_report.output.ncbi_dataset_tsv,
         exclude=DROPPED_STRAINS,
         prealigned_fasta="data/prealigned_sequences.fasta",
         prealigned_tsv="data/prealigned_nextclade.tsv",
@@ -102,15 +102,38 @@ rule filter:
         min_coverage=0.95,
     shell:
         """
-        python scripts/filter.py \
+        python scripts/filter_reformat.py \
             --all-sequences {input.sequences} \
             --all-metadata {input.metadata} \
-	    --dropped-strains {input.exclude} \
+            --dropped-strains {input.exclude} \
             --prealigned-sequences {input.prealigned_fasta} \
             --prealigned-tsv {input.prealigned_tsv} \
             --output-sequences {output.filtered_sequences} \
             --output-metadata {output.filtered_metadata} \
             --min-coverage {params.min_coverage}
+        """
+
+rule curate:
+    message:
+        """
+        Curate date fields in the metadata into consistent YYYY-MM-DD format
+        """
+    input:
+        metadata=rules.filter.output.filtered_metadata,
+    output:
+        curated_metadata="data/curated_metadata.tsv",
+    params:
+        id_column="Accession",
+        date_column="date",
+    shell:
+        """
+        augur curate format-dates \
+            --metadata {input.metadata} \
+            --id-column {params.id_column} \
+            --date-fields {params.date_column} \
+            --expected-date-formats %Y %Y-%m \
+            --output-metadata {output.curated_metadata} \
+	    
         """
 
 
@@ -161,7 +184,7 @@ rule tree:
 rule refine:
     message:
         """
-        Refining tree
+        Refining tree. Clock rate is taken from https://github.com/nextstrain/yellow-fever/blob/main/phylogenetic/defaults/config.yaml
           - estimate timetree
           - use {params.coalescent} coalescent timescale
           - estimate {params.date_inference} node dates
@@ -170,16 +193,18 @@ rule refine:
     input:
         tree=rules.tree.output.tree,
         alignment=rules.align.output.alignment,
-        metadata=rules.filter.output.filtered_metadata
+        metadata=rules.curate.output.curated_metadata
     output:
         tree="results/tree_refined.nwk",
         node_data="results/branch_lengths.json",
     params:
         coalescent="opt",
         date_inference="marginal",
-        clock_filter_iqd=4,
-        id_column="group_id",
+        id_column="Accession",
         root="mid_point",
+        clock_rate=0.0002,
+        clock_std=0.00001,
+        clock_filter_iqd=4,
     shell:
         """
         augur refine \
@@ -188,6 +213,11 @@ rule refine:
             --metadata {input.metadata} \
             --output-tree {output.tree} \
             --output-node-data {output.node_data} \
+            --timetree \
+            --clock-rate {params.clock_rate} \
+            --clock-std-dev {params.clock_std} \
+            --clock-filter-iqd {params.clock_filter_iqd} \
+            --year-bounds 1900 2025 \
             --root {params.root} \
             --metadata-id-columns {params.id_column}
         """
@@ -259,7 +289,7 @@ rule traits:
         "Inferring ancestral traits for {params.columns!s}"
     input:
         tree=rules.refine.output.tree,
-        metadata=rules.filter.output.filtered_metadata,
+        metadata=rules.curate.output.curated_metadata,
     output:
         node_data="results/traits.json",
     params:
@@ -282,7 +312,7 @@ rule export:
         "Exporting data files for for auspice"
     input:
         tree=rules.refine.output.tree,
-        metadata=rules.filter.output.filtered_metadata,
+        metadata=rules.curate.output.curated_metadata,
         clades=rules.clades.output.node_data,
         branch_lengths=rules.refine.output.node_data,
         traits=rules.traits.output.node_data,

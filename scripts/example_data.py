@@ -7,7 +7,7 @@ from Bio import SeqIO
 import click
 import pandas as pd
 
-from filter import read_dropped_strains
+from filter_reformat import read_dropped_strains
 
 REFERENCE_ACCESSION = "NC_002031.1"
 
