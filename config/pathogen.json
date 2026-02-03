@@ -16,7 +16,7 @@
   },
   "alignmentParams": {
         "retryReverseComplement": true,
-        "includeReference": false,
+        "includeReference": false
     },
   "defaultCds": "M",
   "compatibility": {
@@ -26,7 +26,7 @@
   "qc": {
     "frameShifts": {
       "enabled": true,
-      "scoreWeight": 20
+      "scoreWeight": 25
     },
     "missingData": {
       "enabled": true,
@@ -35,20 +35,19 @@
     },
     "mixedSites": {
       "enabled": true,
-      "mixedSitesThreshold": 40
+      "mixedSitesThreshold": 50
     },
     "privateMutations": {
-      "cutoff": 700,
       "enabled": true,
-      "typical": 600,
-      "weightLabeledSubstitutions": 1,
       "weightReversionSubstitutions": 2,
-      "weightUnlabeledSubstitutions": 1
+      "weightLabeledSubstitutions": 1,
+      "weightUnlabeledSubstitutions": 1,
+      "typical": 10,
+      "cutoff": 20
     },
     "stopCodons": {
-      "enabled": true,
-      "scoreWeight": 40
+      "enabled": true
     }
     },
-  "cdsOrderPreference": ["C", "PrM", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"]
+  "cdsOrderPreference": ["C", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"]
 }
