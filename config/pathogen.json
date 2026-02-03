@@ -15,15 +15,8 @@
     "reference accession": "NC_002031.1"
   },
   "alignmentParams": {
-        "penaltyGapOpen": 13,
-        "penaltyGapOpenInFrame": 18,
-        "penaltyGapOpenOutOfFrame": 23,
-        "kmerLength": 6,
-        "kmerDistance": 25,
-        "minMatchLength": 30,
-        "allowedMismatches": 15,
-        "minLength": 100,
-        "minSeedCover": 0.30
+        "retryReverseComplement": true,
+        "includeReference": false,
     },
   "defaultCds": "M",
   "compatibility": {

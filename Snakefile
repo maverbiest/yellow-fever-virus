@@ -48,22 +48,6 @@ rule format_ncbi_dataset_report:
             > {output.ncbi_dataset_tsv}
         """
 
-# rule standardise_geo_data:
-#     input:
-#         metadata=rules.format_ncbi_dataset_report.output.ncbi_dataset_tsv,
-#     output:
-#         metadata_country="data/metadata_with_country.tsv",
-#     params:
-#         location_col="Geographic Location",
-#         country_col="Country",
-#     shell:
-#         """
-#         python3 scripts/standardise_geographic_data.py \
-#             --metadata {input.metadata} \
-#             --location-with-region-col '{params.location_col}' \
-#             --output {output.metadata_country}
-#         """
-
 
 rule prealign:
     input:
@@ -150,13 +134,6 @@ rule align:
     shell:
         """
         nextclade run \
-        --min-seed-cover=0.01 \
-        --kmer-length=7 \
-        --allowed-mismatches=10 \
-        --penalty-gap-open=18 \
-        --penalty-gap-open-in-frame=18 \
-        --penalty-gap-open-out-of-frame=18 \
-        --gap-alignment-side=left \
         --retry-reverse-complement \
         --input-ref={input.reference} \
         --output-fasta={output.alignment} \
@@ -188,6 +165,7 @@ rule refine:
           - estimate timetree
           - use {params.coalescent} coalescent timescale
           - estimate {params.date_inference} node dates
+          - clock rate set to {params.clock_rate} ± {params.clock_std}
           - filter tips more than {params.clock_filter_iqd} IQDs from clock expectation
         """
     input:

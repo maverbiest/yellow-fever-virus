@@ -8,14 +8,14 @@
   "build_url": "",
   "colorings": [
     {
-      "key": "gt",
-      "title": "Genotype",
+      "key": "clade_membership",
+      "title": "Clade",
       "type": "categorical"
     },
     {
-      "key": "Submitter Names",
-      "title": "Author",
-      "type": "categorical"
+        "key": "num_date",
+        "title": "Sampling date",
+        "type": "continuous"
     },
     {
       "key": "Region",
@@ -28,8 +28,13 @@
       "type": "categorical"
     },
     {
-      "key": "clade_membership",
-      "title": "Clade",
+      "key": "Submitter Names",
+      "title": "Author",
+      "type": "categorical"
+    },
+    {
+      "key": "gt",
+      "title": "Genotype",
       "type": "categorical"
     }
   ],
@@ -46,6 +51,7 @@
     "Accession"
   ],
   "display_defaults": {
-    "map_triplicate": true
+    "map_triplicate": true,
+    "color_by": "clade_membership"
   }
 }
