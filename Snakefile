@@ -1,5 +1,6 @@
 REFERENCE = "config/reference.fasta"
 GENOME_ANNOTATION = "config/genome_annotation.gff3"
+GENES = ["C", "prM", "M", "E", "NS1", "NS2a", "NS2b", "NS3", "NS4a", "2K", "NS4b", "RdRPol"]
 PATHOGEN_JSON = "config/pathogen.json"
 TAXON_ID = 11089
 DROPPED_STRAINS = "config/dropped_strains.txt"
@@ -129,16 +130,21 @@ rule align:
         """
     input:
         sequences=rules.filter.output.filtered_sequences,
+        annotation=GENOME_ANNOTATION,
         reference=REFERENCE,
     output:
         alignment="data/aligned_sequence.fasta",
+    params:
+        translation_template=lambda _: "data/translations/cds_{cds}.translation.fasta",
     shell:
         """
         nextclade run \
         --retry-reverse-complement \
         --min-seed-cover 0.2 \
         --input-ref={input.reference} \
+        --input-annotation={input.annotation} \
         --output-fasta={output.alignment} \
+        --output-translations={params.translation_template} \
         --include-reference=false \
         {input.sequences}
         """
@@ -210,37 +216,26 @@ rule ancestral:
         tree=rules.refine.output.tree,
         alignment=rules.align.output,
         reference=REFERENCE,
+        annotation=GENOME_ANNOTATION,
     output:
-        node_data="results/nt_muts.json",
+        node_data="results/muts.json",
     params:
         inference="joint",
+        translation_template=r"data/translations/cds_%GENE.translation.fasta",
+        output_translation_template=r"data/translations/cds_%GENE.ancestral.fasta",
+        genes=" ".join(GENES),
     shell:
         """
         augur ancestral \
             --tree {input.tree} \
-            --alignment {input.alignment} \
-            --output-node-data {output.node_data} \
             --root-sequence {input.reference} \
-            --inference {params.inference}
-        """
-
-
-rule translate:
-    message:
-        "Translating amino acid sequences"
-    input:
-        tree=rules.refine.output.tree,
-        node_data=rules.ancestral.output.node_data,
-        annotation=GENOME_ANNOTATION,
-    output:
-        node_data="results/aa_muts.json",
-    shell:
-        """
-        augur translate \
-            --tree {input.tree} \
-            --ancestral-sequences {input.node_data} \
-            --reference-sequence {input.annotation} \
+            --alignment {input.alignment} \
+            --annotation {input.annotation} \
+            --genes {params.genes} \
+            --inference {params.inference} \
+            --translations {params.translation_template} \
             --output-node-data {output.node_data} \
+            --output-translations {params.output_translation_template}
         """
 
 
@@ -249,8 +244,7 @@ rule clades:
         "Adding internal clade labels"
     input:
         tree=rules.refine.output.tree,
-        aa_muts=rules.translate.output.node_data,
-        nuc_muts=rules.ancestral.output.node_data,
+        muts=rules.ancestral.output.node_data,
         clades=CLADES,
     output:
         node_data="data/clades_raw.json",
@@ -258,7 +252,7 @@ rule clades:
         """
         augur clades \
             --tree {input.tree} \
-            --mutations {input.nuc_muts} {input.aa_muts} \
+            --mutations {input.muts} \
             --clades {input.clades} \
             --output-node-data {output.node_data} 2>&1 | tee {log}
         """
@@ -296,8 +290,7 @@ rule export:
         clades=rules.clades.output.node_data,
         branch_lengths=rules.refine.output.node_data,
         traits=rules.traits.output.node_data,
-        nt_muts=rules.ancestral.output.node_data,
-        aa_muts=rules.translate.output.node_data,
+        muts=rules.ancestral.output.node_data,
         colors=COLORS,
         lat_longs=LAT_LONGS,
         auspice_config=AUSPICE_CONFIG,
@@ -310,7 +303,7 @@ rule export:
         augur export v2 \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} {input.clades} \
+            --node-data {input.branch_lengths} {input.traits}  {input.muts} {input.clades} \
             --colors {input.colors} \
             --lat-longs {input.lat_longs} \
             --auspice-config {input.auspice_config} \
