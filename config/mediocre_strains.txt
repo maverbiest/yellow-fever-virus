@@ -1,0 +1,6 @@
+ON502410.1 #missing data
+ON502414.1 #private mutations
+ON022253.1 #missing data, private mutations
+MH030089.1 #missing data
+GU073131.1 #partial genome, private mutations
+GU073134.1 #partial (Good quality, though)

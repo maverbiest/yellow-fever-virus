@@ -3,6 +3,7 @@ GENOME_ANNOTATION = "config/genome_annotation.gff3"
 PATHOGEN_JSON = "config/pathogen.json"
 TAXON_ID = 11089
 DROPPED_STRAINS = "config/dropped_strains.txt"
+MEDIOCRE_STRAINS = "config/mediocre_strains.txt"
 
 COLORS = ("config/colors.tsv",)
 LAT_LONGS = ("config/lat_longs.tsv",)
@@ -135,6 +136,7 @@ rule align:
         """
         nextclade run \
         --retry-reverse-complement \
+        --min-seed-cover 0.2 \
         --input-ref={input.reference} \
         --output-fasta={output.alignment} \
         --include-reference=false \
@@ -323,6 +325,7 @@ rule generate_example_data:
         sequences=rules.extract_ncbi_dataset_sequences.output.ncbi_dataset_sequences,
         clades=rules.clades.output.node_data,
         dropped_strains=DROPPED_STRAINS,
+        mediocre_strains=MEDIOCRE_STRAINS,
     output:
         output_fasta="data/example_sequences.fasta",
     params:
@@ -333,12 +336,12 @@ rule generate_example_data:
         """
         python scripts/example_data.py \
             --input-fasta {input.sequences} \
-            --n {params.n_sequences} \
+            -n {params.n_sequences} \
             --clade-membership {input.clades} \
-            --dropped_strains {input.dropped_strains} \
-            --balance {params.balance} \
             --seed {params.random_seed} \
             --output {output.output_fasta} \
+            --bad-strains {input.dropped_strains} \
+            --mediocre-strains {input.mediocre_strains}
         """
 
 rule assemble_dataset:
