@@ -140,7 +140,7 @@ rule align:
         """
         nextclade run \
         --retry-reverse-complement \
-        --min-seed-cover 0.2 \
+        --min-seed-cover 0.01 \
         --input-ref={input.reference} \
         --input-annotation={input.annotation} \
         --output-fasta={output.alignment} \

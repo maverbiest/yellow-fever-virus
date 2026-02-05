@@ -22,7 +22,7 @@
   "alignmentParams": {
         "retryReverseComplement": true,
         "includeReference": false,
-        "minSeedCover": 0.2
+        "minSeedCover": 0.01
   },
   "defaultCds": "M",
   "qc": {
